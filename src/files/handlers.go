@@ -15,3 +15,12 @@ func Cmd(c *gin.Context) {
 	c.IndentedJSON(http.StatusAccepted, data)
 	return
 }
+
+func Qry(c *gin.Context) {
+	fmt.Printf("%T", c.Request)
+	data := map[string]interface{}{
+		"success": true,
+	}
+	c.IndentedJSON(http.StatusAccepted, data)
+	return
+}

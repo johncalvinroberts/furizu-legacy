@@ -48,6 +48,6 @@ func main() {
 	// api
 	api := router.Group("/api")
 	filesApi := api.Group("/fs")
-	filesApi.GET("/", files.Cmd)
-	router.Run("localhost:3000")
+	filesApi.POST("/", files.Cmd)
+	router.Run("localhost:4000")
 }

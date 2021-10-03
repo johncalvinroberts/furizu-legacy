@@ -9,7 +9,16 @@
 * The frontend is created with [Svelte](https://svelte.dev/)
 * TODO: database, infrastructure as code
 
+
 ### API Routes
 
-TODO
+### Files
+##### `GET /api/files`
+##### `POST /api/files/{id}`
+##### `GET /api/files/{id}`
+##### `DELETE /api/files/{id}`
+
+
+
+
 
