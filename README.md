@@ -7,18 +7,22 @@
 
 * The backend is created with Golang, using [the gin HTTP framework](https://github.com/gin-gonic/gin)
 * The frontend is created with [Svelte](https://svelte.dev/)
-* TODO: database, infrastructure as code
+* This application has a preference for boring AWS services
+  * Archives are stored on AWS Glacier
+  * User info and data describing the archives is stored on Dynamo DB
+  * AWS's SES is used for sending emails
 
+## Using This App
 
-### API Routes
+This app uses mostly `make` commands.
 
-### Files
-##### `GET /api/files`
-##### `POST /api/files/{id}`
-##### `GET /api/files/{id}`
-##### `DELETE /api/files/{id}`
+* `make install` to install deps for both frontend and beckend
+* Run `make dev` to run backend and frontend in parallel. Frontend will be on localhost:3000, backend on localhost:4000
+* Run `make clean` and `make build` to build the production binary. The output will be in `tmp/furizu`
 
+For more, see the `Makefile`.
 
+## Documentation
 
-
-
+* [API Documentation](./docs/api.md)
+* [Database Schema](./docs/mermaid/dynamo.mmd)

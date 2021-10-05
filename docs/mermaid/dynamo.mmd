@@ -1,0 +1,21 @@
+classDiagram
+    User <-- Archive
+    User <-- WhoamiChallenge
+    class User{
+        id
+        email
+    }
+    
+    class Archive{
+        id        
+        userId
+        state
+    }
+
+    class WhoamiChallenge {
+        ttl
+        userId
+        email
+        value
+    }
+            

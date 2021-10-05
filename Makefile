@@ -1,7 +1,7 @@
 FE_DIR=src/client
 BE_ENTRYPOINT=src/main.go
 AIR_BIN=./bin/air
-BIN=./tmp/furizu
+BIN=tmp/furizu
 
 
 build: build-fe build-be
@@ -36,5 +36,6 @@ run-furizu:
 	$(BIN)
 
 clean:
-	rm -rf $(bin)
+	rm -rf $(BIN)
+	rm -rf tmp/main
 	rm -rf $(FE_DIR)/build

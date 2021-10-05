@@ -1,0 +1,28 @@
+sequenceDiagram
+    participant FE
+    participant BE
+    participant Queue
+    participant Glacier
+    participant Dynamo
+    participant S3
+
+FE-> BE: POST archives
+BE--> FE: {id, uploadInfo, state: initial}
+BE-> Dynamo: Create Inital Record
+FE-> S3: Upload files {id}
+note over S3: upload complete
+note over FE: Begin Polling
+BE->FE: GET archives/:id
+S3 -> Queue: Upload Complete Event {id}
+Queue -> BE: Upload Complete Event {id}
+note over BE: Begin propagation
+BE -> S3: Request Files {id}
+BE -> Glacier: Upload Archive
+BE -> Dynamo: Update state
+note over BE: Complete Propagation
+BE -> Dynamo: Update state, update record
+BE -> FE: Completed upload info {id, state}
+note over FE: End polling, everything done
+
+
+

@@ -9,7 +9,8 @@ import (
 	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 
-	"github.com/johncalvinroberts/furizu/src/files"
+	"github.com/johncalvinroberts/furizu/src/archives"
+	"github.com/johncalvinroberts/furizu/src/whoami"
 )
 
 //go:embed client/build/*
@@ -47,7 +48,19 @@ func main() {
 	router.Use(static.Serve("/", EmbedFolder(embeddedFiles, "client/build")))
 	// api
 	api := router.Group("/api")
-	filesApi := api.Group("/fs")
-	filesApi.POST("/", files.Cmd)
+	// archives
+	archivesApi := api.Group("/archives")
+	archivesApi.GET("/", archives.FindMany)
+	archivesApi.POST("/", archives.Create)
+	archivesApi.GET("/:id", archives.FindOne)
+	archivesApi.DELETE("/:id", archives.DestroyOne)
+	// whoami
+	whoamiApi := api.Group("/whoami")
+	whoamiApi.GET("/", whoami.Me)
+	whoamiApi.POST("/", whoami.Start)
+	whoamiApi.PATCH("/redeem", whoami.Redeem)
+	whoamiApi.PATCH("/refresh", whoami.Refresh)
+	whoamiApi.DELETE("/revoke", whoami.Revoke)
+
 	router.Run("localhost:4000")
 }

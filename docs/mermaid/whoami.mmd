@@ -1,0 +1,34 @@
+sequenceDiagram
+    participant FE
+    participant BE
+    participant Dynamo
+    participant Queue
+    participant SES
+
+FE -> BE: POST /api/whoami {email}
+BE -> Dynamo: set challenge answer {email, answer, ttl}
+BE -> Queue: send email {answer}
+BE --> FE: 202 Accepted
+
+Queue -> SES: send email {answer}
+note over FE: User checks email, gets answer
+
+FE -> BE: PATCH /api/whoami/challenge {answer, email}
+BE -> Dynamo: query email/answer {email}
+note over BE: Validate answer, email, ttl
+note over BE: Generate token
+BE --> FE: 200 JWT
+note over FE: Authenticated
+
+FE -> BE: GET /api/whoami
+note over BE: Validate token
+BE --> FE: 200 user info
+
+FE -> BE: PATCH /api/whoami/refresh
+note over BE: Validate token
+note over BE: Generate token
+BE --> FE: 200 JWT
+
+FE -> BE: DELETE /api/whoami/revoke
+note over BE: Revoke token
+BE --> FE: 204
