@@ -10,6 +10,7 @@
 * This application has a preference for boring AWS services
   * Archives are stored on AWS Glacier
   * User info and data describing the archives is stored on Dynamo DB
+    * [guregu/dynamo](https://github.com/guregu/dynamo) is used for a GO dynamo sdk
   * AWS's SES is used for sending emails
 
 ## Using This App
