@@ -34,7 +34,7 @@ func Start(c *gin.Context) {
 		return
 	}
 	// save to db
-	token, err := UpsertWhoamiChallenge(req.Email)
+	token, err := upsertWhoamiChallenge(req.Email)
 
 	if err != nil {
 		fmt.Printf("token: %s", err.Error())
@@ -54,7 +54,7 @@ func Redeem(c *gin.Context) {
 		return
 	}
 	// lookup whoami challenge
-	result, err := FindWhoamiChallenge(req.Token)
+	result, err := findWhoamiChallenge(req.Token)
 	if err != nil && strings.Contains(err.Error(), "no item found") {
 		c.JSON(http.StatusBadRequest, map[string]interface{}{"success": false, "message": "Token does not exist"})
 		return
@@ -75,7 +75,6 @@ func Redeem(c *gin.Context) {
 	delete token from dynamo
 	create/update user
 	issue JWT
-
 	*/
 	c.JSON(http.StatusOK, map[string]bool{"success": true})
 }
