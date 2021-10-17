@@ -1,13 +1,14 @@
 package whoami
 
 import (
-	"fmt"
+	"log"
 	"net/http"
 	"strings"
 
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/johncalvinroberts/furizu/src/users"
 )
 
 type StartWhoamiReq struct {
@@ -35,13 +36,12 @@ func Start(c *gin.Context) {
 	}
 	// save to db
 	token, err := upsertWhoamiChallenge(req.Email)
-
+	log.Print(token)
 	if err != nil {
-		fmt.Printf("token: %s", err.Error())
+		log.Printf("token: %s", err.Error())
 		c.JSON(http.StatusInternalServerError, err)
 		return
 	}
-	fmt.Printf("token: %s", token)
 	// TODO: send email {answer}
 	c.JSON(http.StatusAccepted, map[string]bool{"success": true})
 }
@@ -61,7 +61,7 @@ func Redeem(c *gin.Context) {
 	}
 
 	if err != nil {
-		fmt.Printf("err %s", err.Error())
+		log.Printf("err %s", err.Error())
 		c.JSON(http.StatusInternalServerError, err)
 		return
 	}
@@ -71,11 +71,22 @@ func Redeem(c *gin.Context) {
 			map[string]interface{}{"success": false, "message": "Token invalid or expired"})
 		return
 	}
-	/* TODO:
-	delete token from dynamo
-	create/update user
-	issue JWT
-	*/
+	// if we get here, successfully redeemed token
+	// create/update user
+	user, err := users.UpsertUser(req.Email)
+	if err != nil {
+		log.Printf("Failed to upsert user %v", err)
+		c.JSON(http.StatusInternalServerError, err)
+		return
+	}
+	log.Printf("User %v", user)
+	/* TODO: issue JWT
+	 */
+	// lastly, delete token from dynamo
+	err = destroyWhoamiChallenge(req.Token)
+	if err != nil {
+		log.Printf("Failed to destroy token %v", err)
+	}
 	c.JSON(http.StatusOK, map[string]bool{"success": true})
 }
 

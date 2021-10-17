@@ -3,10 +3,13 @@ package whoami
 import (
 	"time"
 
+	"github.com/guregu/dynamo"
 	"github.com/johncalvinroberts/furizu/src/utils"
 )
 
 const CHALLENGES_TABLE = "WhoamiChallenges"
+
+var table dynamo.Table
 
 type WhoamiChallenge struct {
 	Email string    `dynamo:"email"`
@@ -14,8 +17,11 @@ type WhoamiChallenge struct {
 	Exp   time.Time `dynamo:"exp"`
 }
 
+func init() {
+	table = utils.FurizuDB.Table(CHALLENGES_TABLE)
+}
+
 func upsertWhoamiChallenge(email string) (token string, err error) {
-	table := utils.FurizuDB.Table(CHALLENGES_TABLE)
 	token = utils.RandomString(10)
 	// generate random token
 	// set exp time
@@ -32,7 +38,11 @@ func upsertWhoamiChallenge(email string) (token string, err error) {
 }
 
 func findWhoamiChallenge(token string) (result *WhoamiChallenge, err error) {
-	table := utils.FurizuDB.Table(CHALLENGES_TABLE)
 	err = table.Get("token", token).One(&result)
 	return result, err
+}
+
+func destroyWhoamiChallenge(token string) (err error) {
+	err = table.Delete("token", token).Run()
+	return err
 }

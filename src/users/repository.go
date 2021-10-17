@@ -17,10 +17,10 @@ var table dynamo.Table
 var userUuidNamespace uuid.UUID
 
 type User struct {
-	Email        string    `dynamo:"email"`
+	Email        string    `dynamo:"email"` //primary key
 	Id           string    `dynamo:"id"`
 	CreatedAt    time.Time `dynamo:"createdAt"`
-	lastUpsertAt time.Time `dynamo:"lastUpsertAt"`
+	LastUpsertAt time.Time `dynamo:"lastUpsertAt"`
 }
 
 func init() {
@@ -35,30 +35,27 @@ func init() {
 
 func UpsertUser(email string) (user *User, err error) {
 	user, err = FindUserByEmail(email)
-	isNotFound := strings.Contains(err.Error(), "no item found")
+	isNotFound := err != nil && strings.Contains(err.Error(), "no item found")
 
 	if err != nil && !isNotFound {
 		log.Fatalf("Failed to query for user %v", err)
 		return nil, err
 	}
 
-	if err != nil && isNotFound {
+	if isNotFound {
 		user = &User{
 			Email:        email,
 			Id:           uuid.NewV5(userUuidNamespace, email).String(),
 			CreatedAt:    time.Now(),
-			lastUpsertAt: time.Now(),
+			LastUpsertAt: time.Now(),
 		}
+		err = table.Put(user).Run()
+		return user, err
 	}
-	if !isNotFound {
-		user.lastUpsertAt = time.Now()
-	}
-	err = table.Put(user).Run()
-	if err != nil && !isNotFound {
-		log.Fatalf("Failed to put %v", err)
-		return nil, err
-	}
-	return user, nil
+	// user is a returning user
+	// TODO: this is failing
+	err = table.Update("email", email).Set("lastUpsertAt", time.Now()).Run()
+	return user, err
 }
 
 func FindUserByEmail(email string) (user *User, err error) {
