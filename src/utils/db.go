@@ -9,7 +9,7 @@ import (
 var FurizuDB *dynamo.DB
 var AwsSession *session.Session
 
-func init() {
+func InitDB() {
 	AwsSession = session.Must(session.NewSession())
 	FurizuDB = dynamo.New(AwsSession, &aws.Config{Region: aws.String("us-west-2")})
 }

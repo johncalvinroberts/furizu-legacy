@@ -7,8 +7,6 @@ import (
 	"github.com/johncalvinroberts/furizu/src/utils"
 )
 
-const CHALLENGES_TABLE = "WhoamiChallenges"
-
 var table dynamo.Table
 
 type WhoamiChallenge struct {
@@ -17,8 +15,8 @@ type WhoamiChallenge struct {
 	Exp   time.Time `dynamo:"exp"`
 }
 
-func init() {
-	table = utils.FurizuDB.Table(CHALLENGES_TABLE)
+func InitRepository(db *dynamo.DB, tableName string) {
+	table = utils.FurizuDB.Table(tableName)
 }
 
 func upsertWhoamiChallenge(email string) (token string, err error) {

@@ -5,11 +5,14 @@ import (
 	"fmt"
 	"io/fs"
 	"net/http"
+	"os"
 
 	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 
 	"github.com/johncalvinroberts/furizu/src/archives"
+	"github.com/johncalvinroberts/furizu/src/users"
+	"github.com/johncalvinroberts/furizu/src/utils"
 	"github.com/johncalvinroberts/furizu/src/whoami"
 )
 
@@ -43,6 +46,13 @@ func EmbedFolder(fsEmbed embed.FS, targetPath string) static.ServeFileSystem {
 // run the server
 func main() {
 	fmt.Println("Starting Server")
+	utils.InitEnv()
+	utils.InitJWT()
+	utils.InitDB()
+	// get table names
+	users.InitRepository(utils.FurizuDB, os.Getenv("USERS_TABLE"))
+	whoami.InitRepository(utils.FurizuDB, os.Getenv("WHOAMI_CHALLENGES_TABLE"))
+
 	router := gin.Default()
 	// static server
 	router.Use(static.Serve("/", EmbedFolder(embeddedFiles, "client/build")))

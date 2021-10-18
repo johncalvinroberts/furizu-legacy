@@ -1,6 +1,7 @@
 package whoami
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"strings"
@@ -9,6 +10,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/johncalvinroberts/furizu/src/users"
+	"github.com/johncalvinroberts/furizu/src/utils"
 )
 
 type StartWhoamiReq struct {
@@ -79,9 +81,16 @@ func Redeem(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, err)
 		return
 	}
-	log.Printf("User %v", user)
-	/* TODO: issue JWT
-	 */
+	// issue jwt
+	token, err := utils.FurizuJWT.ToToken(map[string]string{
+		"userId": fmt.Sprint(user.Id),
+		"email":  fmt.Sprint(user.Email),
+	})
+	if err != nil {
+		log.Printf("Failed to issue jwt %v", err)
+	}
+	// set cookie
+	utils.SetCookie(c, token)
 	// lastly, delete token from dynamo
 	err = destroyWhoamiChallenge(req.Token)
 	if err != nil {

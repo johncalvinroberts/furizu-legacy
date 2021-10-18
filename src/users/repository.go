@@ -7,10 +7,8 @@ import (
 
 	"github.com/gofrs/uuid"
 	"github.com/guregu/dynamo"
-	"github.com/johncalvinroberts/furizu/src/utils"
 )
 
-const USERS_TABLE = "Users"
 const USERS_UUID_NS = "3033d171-09f3-4648-8c28-843e73a5b7e7"
 
 var table dynamo.Table
@@ -23,8 +21,8 @@ type User struct {
 	LastUpsertAt time.Time `dynamo:"lastUpsertAt"`
 }
 
-func init() {
-	table = utils.FurizuDB.Table(USERS_TABLE)
+func InitRepository(db *dynamo.DB, tableName string) {
+	table = db.Table(tableName)
 	res, err := uuid.FromString(USERS_UUID_NS)
 
 	if err != nil {
@@ -53,7 +51,6 @@ func UpsertUser(email string) (user *User, err error) {
 		return user, err
 	}
 	// user is a returning user
-	// TODO: this is failing
 	err = table.Update("email", email).Set("lastUpsertAt", time.Now()).Run()
 	return user, err
 }
