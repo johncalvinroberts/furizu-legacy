@@ -44,7 +44,10 @@ func Start(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, err)
 		return
 	}
-	// TODO: send email {answer}
+	msg := fmt.Sprintf(`Copy and paste this temporary login code
+	<pre style="padding:16px 24px;border:1px solid #eeeeee;background-color:#f4f4f4;border-radius:3px;font-family:monospace;margin-bottom:24px">%s</pre>
+	`, token)
+	utils.SendANiceEmail(req.Email, msg, "Log in code to furizu")
 	c.JSON(http.StatusAccepted, map[string]bool{"success": true})
 }
 
@@ -89,14 +92,12 @@ func Redeem(c *gin.Context) {
 	if err != nil {
 		log.Printf("Failed to issue jwt %v", err)
 	}
-	// set cookie
-	utils.SetCookie(c, token)
 	// lastly, delete token from dynamo
 	err = destroyWhoamiChallenge(req.Token)
 	if err != nil {
 		log.Printf("Failed to destroy token %v", err)
 	}
-	c.JSON(http.StatusOK, map[string]bool{"success": true})
+	c.JSON(http.StatusOK, map[string]interface{}{"success": true, "token": token})
 }
 
 func Refresh(c *gin.Context) {

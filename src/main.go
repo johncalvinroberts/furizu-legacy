@@ -48,7 +48,7 @@ func main() {
 	fmt.Println("Starting Server")
 	utils.InitEnv()
 	utils.InitJWT()
-	utils.InitDB()
+	utils.InitAWS()
 	// get table names
 	users.InitRepository(utils.FurizuDB, os.Getenv("USERS_TABLE"))
 	whoami.InitRepository(utils.FurizuDB, os.Getenv("WHOAMI_CHALLENGES_TABLE"))
