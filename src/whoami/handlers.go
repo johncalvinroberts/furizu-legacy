@@ -86,8 +86,8 @@ func Redeem(c *gin.Context) {
 	}
 	// issue jwt
 	token, err := utils.FurizuJWT.ToToken(map[string]string{
-		"userId": fmt.Sprint(user.Id),
-		"email":  fmt.Sprint(user.Email),
+		"id":    fmt.Sprint(user.Id),
+		"email": fmt.Sprint(user.Email),
 	})
 	if err != nil {
 		log.Printf("Failed to issue jwt %v", err)

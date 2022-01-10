@@ -10,16 +10,18 @@ import (
 	jwtpkg "github.com/robbert229/jwt"
 )
 
-type JWTEncDec struct {
+const EXPIRE_CLAIM = "expire"
+
+type jwtEncDec struct {
 	alg jwtpkg.Algorithm
 }
 
-var FurizuJWT *JWTEncDec
+var FurizuJWT *jwtEncDec
 
 var ttlMs int
 
 func InitJWT() {
-	FurizuJWT = &JWTEncDec{
+	FurizuJWT = &jwtEncDec{
 		alg: jwtpkg.HmacSha256(os.Getenv("JWT_SECRET")),
 	}
 	var err error
@@ -30,7 +32,7 @@ func InitJWT() {
 	}
 }
 
-func (ed *JWTEncDec) FromToken(token string, kvs map[string]string) (map[string]string, error) {
+func (ed *jwtEncDec) FromToken(token string, kvs map[string]string) (map[string]string, error) {
 	claims, err := ed.alg.Decode(token)
 	if err != nil {
 		return nil, err
@@ -51,9 +53,9 @@ func (ed *JWTEncDec) FromToken(token string, kvs map[string]string) (map[string]
 	return kvs, nil
 }
 
-func (ed *JWTEncDec) ToToken(kvs map[string]string) (string, error) {
+func (ed *jwtEncDec) ToToken(kvs map[string]string) (string, error) {
 	claims := jwtpkg.NewClaim()
-	claims.Set("expire", time.Now().Unix()+int64(ttlMs))
+	claims.Set(EXPIRE_CLAIM, time.Now().Unix()+int64(ttlMs))
 	for key, val := range kvs {
 		claims.Set(key, val)
 	}
@@ -63,4 +65,33 @@ func (ed *JWTEncDec) ToToken(kvs map[string]string) (string, error) {
 		return "", err
 	}
 	return token, nil
+}
+
+func (ed *jwtEncDec) ValidateFromToken(token string) (decoded map[string]string, err error) {
+	err = ed.alg.Validate(token)
+	if err != nil {
+		return nil, err
+	}
+	claims := map[string]string{
+		"id":         "",
+		"email":      "",
+		EXPIRE_CLAIM: "",
+	}
+	decoded, err = ed.FromToken(token, claims)
+	if err != nil {
+		return nil, err
+	}
+	exp, strconvErr := strconv.Atoi(decoded[EXPIRE_CLAIM])
+	if strconvErr != nil {
+		return nil, strconvErr
+	}
+
+	if time.Now().Unix() > int64(exp) {
+		return nil, errors.New("token expired")
+	}
+
+	if err != nil {
+		return nil, err
+	}
+	return decoded, nil
 }

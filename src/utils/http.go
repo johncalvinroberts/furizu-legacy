@@ -18,3 +18,7 @@ func SetCookie(c *gin.Context, token string) {
 	// NOTE: ttlMs set in .jwt.go
 	c.SetCookie("tk", token, ttlMs, "/", "", secure, httpOnly)
 }
+
+func RespondWithError(c *gin.Context, code int, message interface{}) {
+	c.AbortWithStatusJSON(code, gin.H{"error": message})
+}
