@@ -93,5 +93,6 @@ func (ed *jwtEncDec) ValidateFromToken(token string) (decoded map[string]string,
 	if err != nil {
 		return nil, err
 	}
+
 	return decoded, nil
 }

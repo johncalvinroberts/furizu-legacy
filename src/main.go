@@ -11,6 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/johncalvinroberts/furizu/src/archives"
+	"github.com/johncalvinroberts/furizu/src/middleware"
 	"github.com/johncalvinroberts/furizu/src/users"
 	"github.com/johncalvinroberts/furizu/src/utils"
 	"github.com/johncalvinroberts/furizu/src/whoami"
@@ -26,10 +27,7 @@ type embedFileSystem struct {
 // needed to fulfill the interface of gin-contrib/static
 func (e embedFileSystem) Exists(prefix string, path string) bool {
 	_, err := e.Open(path)
-	if err != nil {
-		return false
-	}
-	return true
+	return err == nil
 }
 
 // embed folder to FS
@@ -60,17 +58,18 @@ func main() {
 	api := router.Group("/api")
 	// archives
 	archivesApi := api.Group("/archives")
+	archivesApi.Use(middleware.Authenticate)
 	archivesApi.GET("/", archives.FindMany)
 	archivesApi.POST("/", archives.Create)
 	archivesApi.GET("/:id", archives.FindOne)
 	archivesApi.DELETE("/:id", archives.DestroyOne)
 	// whoami
 	whoamiApi := api.Group("/whoami")
-	whoamiApi.GET("/", whoami.Me)
+	whoamiApi.GET("/", whoami.Me).Use(middleware.Authenticate)
 	whoamiApi.POST("/", whoami.Start)
 	whoamiApi.PATCH("/redeem", whoami.Redeem)
-	whoamiApi.PATCH("/refresh", whoami.Refresh)
-	whoamiApi.DELETE("/revoke", whoami.Revoke)
+	whoamiApi.PATCH("/refresh", whoami.Refresh).Use(middleware.Authenticate)
+	whoamiApi.DELETE("/revoke", whoami.Revoke).Use(middleware.Authenticate)
 
 	router.Run("localhost:4000")
 }

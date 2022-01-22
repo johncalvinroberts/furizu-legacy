@@ -24,8 +24,11 @@ type RedeemWhoamiReq struct {
 
 // get current user
 func Me(c *gin.Context) {
-	// lookup user
-	c.JSON(http.StatusAccepted, map[string]bool{"success": true})
+	user, ok := c.Get("user")
+	if !ok {
+		utils.RespondWithError(c, http.StatusInternalServerError, map[string]interface{}{"success": false})
+	}
+	c.JSON(http.StatusAccepted, map[string]interface{}{"success": true, "user": user})
 }
 
 // initialize a whoami flow

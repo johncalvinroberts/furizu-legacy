@@ -59,3 +59,8 @@ func FindUserByEmail(email string) (user *User, err error) {
 	err = table.Get("email", email).One(&user)
 	return user, err
 }
+
+func FindUserById(id string) (user *User, err error) {
+	err = table.Get("id", id).One(&user)
+	return user, err
+}
