@@ -5,6 +5,7 @@ go 1.17
 require (
 	github.com/99designs/gqlgen v0.15.1
 	github.com/aws/aws-sdk-go v1.40.55
+	github.com/gin-contrib/static v0.0.1
 	github.com/gin-gonic/gin v1.7.4
 	github.com/gofrs/uuid v3.2.0+incompatible
 	github.com/guregu/dynamo v1.11.0
