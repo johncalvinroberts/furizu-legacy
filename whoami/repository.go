@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/guregu/dynamo"
-	"github.com/johncalvinroberts/furizu/src/utils"
+	"github.com/johncalvinroberts/furizu/utils"
 )
 
 var table dynamo.Table

@@ -1,5 +1,5 @@
-FE_DIR=src/client
-BE_ENTRYPOINT=src/main.go
+FE_DIR=client
+BE_ENTRYPOINT=main.go
 AIR_BIN=./bin/air
 BIN=tmp/furizu
 
@@ -39,3 +39,6 @@ clean:
 	rm -rf $(BIN)
 	rm -rf tmp/main
 	rm -rf $(FE_DIR)/build
+
+gql:
+	go run scripts/gqlgen.go generate

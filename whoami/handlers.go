@@ -1,6 +1,7 @@
 package whoami
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -9,13 +10,9 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/johncalvinroberts/furizu/src/users"
-	"github.com/johncalvinroberts/furizu/src/utils"
+	"github.com/johncalvinroberts/furizu/users"
+	"github.com/johncalvinroberts/furizu/utils"
 )
-
-type StartWhoamiReq struct {
-	Email string `json:"email"`
-}
 
 type RedeemWhoamiReq struct {
 	Email string `json:"email"`
@@ -32,63 +29,46 @@ func Me(c *gin.Context) {
 }
 
 // initialize a whoami flow
-func Start(c *gin.Context) {
-	// lookup existing user
-	req := &StartWhoamiReq{}
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, err)
-		return
-	}
+func Start(email string) error {
 	// save to db
-	token, err := upsertWhoamiChallenge(req.Email)
+	token, err := upsertWhoamiChallenge(email)
 	log.Print(token)
 	if err != nil {
 		log.Printf("token: %s", err.Error())
-		c.JSON(http.StatusInternalServerError, err)
-		return
+		return err
 	}
 	msg := fmt.Sprintf(`Copy and paste this temporary login code
 	<pre style="padding:16px 24px;border:1px solid #eeeeee;background-color:#f4f4f4;border-radius:3px;font-family:monospace;margin-bottom:24px">%s</pre>
 	`, token)
-	utils.SendANiceEmail(req.Email, msg, "Log in code to furizu")
-	c.JSON(http.StatusAccepted, map[string]bool{"success": true})
+	utils.SendANiceEmail(email, msg, "Log in code to furizu")
+	return nil
 }
 
 // find WhoamiChallenge based on request
-func Redeem(c *gin.Context) {
-	req := &RedeemWhoamiReq{}
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, err)
-		return
-	}
+func Redeem(email string, token string) (jwt string, err error) {
 	// lookup whoami challenge
-	result, err := findWhoamiChallenge(req.Token)
+	result, err := findWhoamiChallenge(token)
 	if err != nil && strings.Contains(err.Error(), "no item found") {
-		c.JSON(http.StatusBadRequest, map[string]interface{}{"success": false, "message": "Token does not exist"})
-		return
+		return jwt, err
 	}
 
 	if err != nil {
 		log.Printf("err %s", err.Error())
-		c.JSON(http.StatusInternalServerError, err)
-		return
+		return jwt, err
 	}
 	// return 400 if invalid
-	if result.Exp.Before(time.Now()) || result.Email != req.Email {
-		c.JSON(http.StatusBadRequest,
-			map[string]interface{}{"success": false, "message": "Token invalid or expired"})
-		return
+	if result.Exp.Before(time.Now()) || result.Email != email {
+		return jwt, errors.New("Token invalid or expired")
 	}
 	// if we get here, successfully redeemed token
 	// create/update user
-	user, err := users.UpsertUser(req.Email)
+	user, err := users.UpsertUser(email)
 	if err != nil {
 		log.Printf("Failed to upsert user %v", err)
-		c.JSON(http.StatusInternalServerError, err)
-		return
+		return jwt, err
 	}
 	// issue jwt
-	token, err := utils.FurizuJWT.ToToken(map[string]string{
+	jwt, err = utils.FurizuJWT.ToToken(map[string]string{
 		"id":    fmt.Sprint(user.Id),
 		"email": fmt.Sprint(user.Email),
 	})
@@ -96,11 +76,11 @@ func Redeem(c *gin.Context) {
 		log.Printf("Failed to issue jwt %v", err)
 	}
 	// lastly, delete token from dynamo
-	err = destroyWhoamiChallenge(req.Token)
+	err = destroyWhoamiChallenge(token)
 	if err != nil {
 		log.Printf("Failed to destroy token %v", err)
 	}
-	c.JSON(http.StatusOK, map[string]interface{}{"success": true, "token": token})
+	return jwt, nil
 }
 
 func Refresh(c *gin.Context) {
