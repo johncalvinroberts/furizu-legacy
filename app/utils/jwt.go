@@ -67,26 +67,19 @@ func (ed *jwtEncDec) ToToken(kvs map[string]string) (string, error) {
 	return token, nil
 }
 
-func (ed *jwtEncDec) ValidateFromToken(token string) (decoded map[string]string, err error) {
+func (ed *jwtEncDec) ValidateFromToken(token string) (claims *jwtpkg.Claims, err error) {
 	err = ed.alg.Validate(token)
 	if err != nil {
 		return nil, err
 	}
-	claims := map[string]string{
-		"id":         "",
-		"email":      "",
-		EXPIRE_CLAIM: "",
-	}
-	decoded, err = ed.FromToken(token, claims)
+
+	claims, err = ed.alg.DecodeAndValidate(token)
 	if err != nil {
 		return nil, err
 	}
-	exp, strconvErr := strconv.Atoi(decoded[EXPIRE_CLAIM])
-	if strconvErr != nil {
-		return nil, strconvErr
-	}
+	exp, err := claims.GetTime(EXPIRE_CLAIM)
 
-	if time.Now().Unix() > int64(exp) {
+	if time.Now().Unix() > exp.Unix() {
 		return nil, errors.New("token expired")
 	}
 
@@ -94,5 +87,5 @@ func (ed *jwtEncDec) ValidateFromToken(token string) (decoded map[string]string,
 		return nil, err
 	}
 
-	return decoded, nil
+	return claims, nil
 }

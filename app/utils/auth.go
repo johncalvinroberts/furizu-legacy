@@ -2,7 +2,6 @@ package utils
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/gin-gonic/gin"
 	"github.com/johncalvinroberts/furizu/app/users"
@@ -18,12 +17,16 @@ func Authenticate(c *gin.Context) (user *users.User, err error) {
 		return nil, errors.New("no token")
 	}
 
-	fmt.Println(token)
 	decoded, err := FurizuJWT.ValidateFromToken(token)
 	if err != nil {
 		return nil, err
 	}
-	user, err = users.FindUserById(decoded["id"])
+
+	userId, err := decoded.Get("email")
+	if err != nil {
+		return nil, err
+	}
+	user, err = users.FindUserByEmail(userId.(string))
 	if err != nil {
 		return nil, err
 	}
