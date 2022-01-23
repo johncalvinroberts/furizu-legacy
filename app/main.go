@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"embed"
 	"fmt"
 	"io/fs"
@@ -45,7 +46,8 @@ func main() {
 	}
 	router := gin.Default()
 	// static server
-	router.Use(static.Serve("/", EmbedFolder(embeddedFiles, "client/build")))
+	router.Use(static.Serve("/", embedFolder(embeddedFiles, "client/build")))
+	router.Use(ginContextToContextMiddleware())
 	router.GET("/playground", playgroundHandler())
 	router.POST("/query", graphQlHandler())
 
@@ -60,7 +62,7 @@ func (e embedFileSystem) Exists(prefix string, path string) bool {
 }
 
 // embed folder to FS
-func EmbedFolder(fsEmbed embed.FS, targetPath string) static.ServeFileSystem {
+func embedFolder(fsEmbed embed.FS, targetPath string) static.ServeFileSystem {
 	fsys, err := fs.Sub(fsEmbed, targetPath)
 	if err != nil {
 		panic(err)
@@ -85,5 +87,13 @@ func graphQlHandler() gin.HandlerFunc {
 
 	return func(c *gin.Context) {
 		h.ServeHTTP(c.Writer, c.Request)
+	}
+}
+
+func ginContextToContextMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		ctx := context.WithValue(c.Request.Context(), "GinContextKey", c)
+		c.Request = c.Request.WithContext(ctx)
+		c.Next()
 	}
 }

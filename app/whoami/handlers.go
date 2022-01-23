@@ -1,6 +1,7 @@
 package whoami
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"log"
@@ -20,12 +21,16 @@ type RedeemWhoamiReq struct {
 }
 
 // get current user
-func Me(c *gin.Context) {
-	user, ok := c.Get("user")
-	if !ok {
-		utils.RespondWithError(c, http.StatusInternalServerError, map[string]interface{}{"success": false})
+func Me(ctx context.Context) (user *users.User, err error) {
+	gc, err := utils.GinContextFromContext(ctx)
+	if err != nil {
+		return nil, err
 	}
-	c.JSON(http.StatusAccepted, map[string]interface{}{"success": true, "user": user})
+	user, err = utils.Authenticate(gc)
+	if err != nil {
+		return nil, err
+	}
+	return user, err
 }
 
 // initialize a whoami flow
@@ -69,7 +74,7 @@ func Redeem(email string, token string) (jwt string, err error) {
 	}
 	// issue jwt
 	jwt, err = utils.FurizuJWT.ToToken(map[string]string{
-		"id":    fmt.Sprint(user.Id),
+		"id":    fmt.Sprint(user.ID),
 		"email": fmt.Sprint(user.Email),
 	})
 	if err != nil {

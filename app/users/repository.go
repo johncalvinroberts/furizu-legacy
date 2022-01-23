@@ -10,13 +10,14 @@ import (
 )
 
 const USERS_UUID_NS = "3033d171-09f3-4648-8c28-843e73a5b7e7"
+const USERS_CTX_KEY = "USER"
 
 var table dynamo.Table
 var userUuidNamespace uuid.UUID
 
 type User struct {
 	Email        string    `dynamo:"email"` //primary key
-	Id           string    `dynamo:"id"`
+	ID           string    `dynamo:"id"`
 	CreatedAt    time.Time `dynamo:"createdAt"`
 	LastUpsertAt time.Time `dynamo:"lastUpsertAt"`
 }
@@ -43,7 +44,7 @@ func UpsertUser(email string) (user *User, err error) {
 	if isNotFound {
 		user = &User{
 			Email:        email,
-			Id:           uuid.NewV5(userUuidNamespace, email).String(),
+			ID:           uuid.NewV5(userUuidNamespace, email).String(),
 			CreatedAt:    time.Now(),
 			LastUpsertAt: time.Now(),
 		}

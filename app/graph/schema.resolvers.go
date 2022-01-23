@@ -36,7 +36,19 @@ func (r *mutationResolver) RevokeToken(ctx context.Context) (*model.EmptyRespons
 }
 
 func (r *queryResolver) Me(ctx context.Context) (*model.User, error) {
-	panic(fmt.Errorf("not implemented"))
+	user, err := whoami.Me(ctx)
+	// TODO: some kind of serialization layer
+	// db/repository types should be different from public-facing "model" types
+	// can also cut down on this kind of stupid mapping
+	if err != nil {
+		return nil, err
+	}
+	return &model.User{
+		ID:           user.ID,
+		Email:        user.Email,
+		CreatedAt:    user.CreatedAt.String(),
+		LastUpsertAt: user.LastUpsertAt.String(),
+	}, err
 }
 
 // Mutation returns generated.MutationResolver implementation.
