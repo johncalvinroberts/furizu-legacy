@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/johncalvinroberts/furizu/users"
+	"github.com/johncalvinroberts/furizu/app/users"
 )
 
 func Authenticate(c *gin.Context) {

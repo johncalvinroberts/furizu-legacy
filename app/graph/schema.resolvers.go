@@ -7,9 +7,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/johncalvinroberts/furizu/graph/generated"
-	"github.com/johncalvinroberts/furizu/graph/model"
-	"github.com/johncalvinroberts/furizu/whoami"
+	"github.com/johncalvinroberts/furizu/app/graph/generated"
+	"github.com/johncalvinroberts/furizu/app/graph/model"
+	"github.com/johncalvinroberts/furizu/app/whoami"
 )
 
 func (r *mutationResolver) StartWhoamiChallenge(ctx context.Context, email string) (*model.EmptyResponse, error) {

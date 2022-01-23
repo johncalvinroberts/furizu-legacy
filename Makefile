@@ -1,5 +1,5 @@
-FE_DIR=client
-BE_ENTRYPOINT=main.go
+FE_DIR=app/client
+BE_ENTRYPOINT=app/main.go
 AIR_BIN=./bin/air
 BIN=tmp/furizu
 

@@ -12,7 +12,7 @@ import (
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
-	"github.com/johncalvinroberts/furizu/graph/model"
+	"github.com/johncalvinroberts/furizu/app/graph/model"
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
 )
@@ -262,7 +262,7 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
-	{Name: "graph/schema.graphqls", Input: `# GraphQL schema example
+	{Name: "app/graph/schema.graphqls", Input: `# GraphQL schema example
 #
 # https://gqlgen.com/getting-started/
 
@@ -534,7 +534,7 @@ func (ec *executionContext) _Mutation_startWhoamiChallenge(ctx context.Context, 
 	}
 	res := resTmp.(*model.EmptyResponse)
 	fc.Result = res
-	return ec.marshalOEmptyResponse2ᚖgithubᚗcomᚋjohncalvinrobertsᚋfurizuᚋgraphᚋmodelᚐEmptyResponse(ctx, field.Selections, res)
+	return ec.marshalOEmptyResponse2ᚖgithubᚗcomᚋjohncalvinrobertsᚋfurizuᚋappᚋgraphᚋmodelᚐEmptyResponse(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_redeemWhoamiChallenge(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -573,7 +573,7 @@ func (ec *executionContext) _Mutation_redeemWhoamiChallenge(ctx context.Context,
 	}
 	res := resTmp.(*model.JwtResponse)
 	fc.Result = res
-	return ec.marshalOJwtResponse2ᚖgithubᚗcomᚋjohncalvinrobertsᚋfurizuᚋgraphᚋmodelᚐJwtResponse(ctx, field.Selections, res)
+	return ec.marshalOJwtResponse2ᚖgithubᚗcomᚋjohncalvinrobertsᚋfurizuᚋappᚋgraphᚋmodelᚐJwtResponse(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_refreshJwt(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -605,7 +605,7 @@ func (ec *executionContext) _Mutation_refreshJwt(ctx context.Context, field grap
 	}
 	res := resTmp.(*model.JwtResponse)
 	fc.Result = res
-	return ec.marshalOJwtResponse2ᚖgithubᚗcomᚋjohncalvinrobertsᚋfurizuᚋgraphᚋmodelᚐJwtResponse(ctx, field.Selections, res)
+	return ec.marshalOJwtResponse2ᚖgithubᚗcomᚋjohncalvinrobertsᚋfurizuᚋappᚋgraphᚋmodelᚐJwtResponse(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_revokeToken(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -637,7 +637,7 @@ func (ec *executionContext) _Mutation_revokeToken(ctx context.Context, field gra
 	}
 	res := resTmp.(*model.EmptyResponse)
 	fc.Result = res
-	return ec.marshalOEmptyResponse2ᚖgithubᚗcomᚋjohncalvinrobertsᚋfurizuᚋgraphᚋmodelᚐEmptyResponse(ctx, field.Selections, res)
+	return ec.marshalOEmptyResponse2ᚖgithubᚗcomᚋjohncalvinrobertsᚋfurizuᚋappᚋgraphᚋmodelᚐEmptyResponse(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_me(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -672,7 +672,7 @@ func (ec *executionContext) _Query_me(ctx context.Context, field graphql.Collect
 	}
 	res := resTmp.(*model.User)
 	fc.Result = res
-	return ec.marshalNUser2ᚖgithubᚗcomᚋjohncalvinrobertsᚋfurizuᚋgraphᚋmodelᚐUser(ctx, field.Selections, res)
+	return ec.marshalNUser2ᚖgithubᚗcomᚋjohncalvinrobertsᚋfurizuᚋappᚋgraphᚋmodelᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -2773,11 +2773,11 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 	return res
 }
 
-func (ec *executionContext) marshalNUser2githubᚗcomᚋjohncalvinrobertsᚋfurizuᚋgraphᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v model.User) graphql.Marshaler {
+func (ec *executionContext) marshalNUser2githubᚗcomᚋjohncalvinrobertsᚋfurizuᚋappᚋgraphᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v model.User) graphql.Marshaler {
 	return ec._User(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋjohncalvinrobertsᚋfurizuᚋgraphᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v *model.User) graphql.Marshaler {
+func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋjohncalvinrobertsᚋfurizuᚋappᚋgraphᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v *model.User) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -3066,14 +3066,14 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	return res
 }
 
-func (ec *executionContext) marshalOEmptyResponse2ᚖgithubᚗcomᚋjohncalvinrobertsᚋfurizuᚋgraphᚋmodelᚐEmptyResponse(ctx context.Context, sel ast.SelectionSet, v *model.EmptyResponse) graphql.Marshaler {
+func (ec *executionContext) marshalOEmptyResponse2ᚖgithubᚗcomᚋjohncalvinrobertsᚋfurizuᚋappᚋgraphᚋmodelᚐEmptyResponse(ctx context.Context, sel ast.SelectionSet, v *model.EmptyResponse) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._EmptyResponse(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOJwtResponse2ᚖgithubᚗcomᚋjohncalvinrobertsᚋfurizuᚋgraphᚋmodelᚐJwtResponse(ctx context.Context, sel ast.SelectionSet, v *model.JwtResponse) graphql.Marshaler {
+func (ec *executionContext) marshalOJwtResponse2ᚖgithubᚗcomᚋjohncalvinrobertsᚋfurizuᚋappᚋgraphᚋmodelᚐJwtResponse(ctx context.Context, sel ast.SelectionSet, v *model.JwtResponse) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}

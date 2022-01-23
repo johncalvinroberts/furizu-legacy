@@ -10,8 +10,8 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/johncalvinroberts/furizu/users"
-	"github.com/johncalvinroberts/furizu/utils"
+	"github.com/johncalvinroberts/furizu/app/users"
+	"github.com/johncalvinroberts/furizu/app/utils"
 )
 
 type RedeemWhoamiReq struct {
@@ -49,7 +49,7 @@ func Redeem(email string, token string) (jwt string, err error) {
 	// lookup whoami challenge
 	result, err := findWhoamiChallenge(token)
 	if err != nil && strings.Contains(err.Error(), "no item found") {
-		return jwt, err
+		return jwt, errors.New("token invalid or expired")
 	}
 
 	if err != nil {
@@ -58,7 +58,7 @@ func Redeem(email string, token string) (jwt string, err error) {
 	}
 	// return 400 if invalid
 	if result.Exp.Before(time.Now()) || result.Email != email {
-		return jwt, errors.New("Token invalid or expired")
+		return jwt, errors.New("token invalid or expired")
 	}
 	// if we get here, successfully redeemed token
 	// create/update user

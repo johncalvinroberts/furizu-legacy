@@ -8,14 +8,14 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/johncalvinroberts/furizu/users"
-	"github.com/johncalvinroberts/furizu/utils"
-	"github.com/johncalvinroberts/furizu/whoami"
+	"github.com/johncalvinroberts/furizu/app/users"
+	"github.com/johncalvinroberts/furizu/app/utils"
+	"github.com/johncalvinroberts/furizu/app/whoami"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
-	"github.com/johncalvinroberts/furizu/graph"
-	"github.com/johncalvinroberts/furizu/graph/generated"
+	"github.com/johncalvinroberts/furizu/app/graph"
+	"github.com/johncalvinroberts/furizu/app/graph/generated"
 )
 
 const defaultPort = "4000"
