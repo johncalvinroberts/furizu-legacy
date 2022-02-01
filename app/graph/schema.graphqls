@@ -21,12 +21,13 @@ type Query {
 
 type JwtResponse {
   success: Boolean!
-  jwt: String!
+  accessToken: String!
+  refreshToken: String!
 }
 
 type Mutation {
   startWhoamiChallenge(email: String!): EmptyResponse
   redeemWhoamiChallenge(email: String!, token: String!): JwtResponse
-  refreshJwt: JwtResponse
+  refreshToken(prevRefreshToken: String!): JwtResponse
   revokeToken: EmptyResponse
 }

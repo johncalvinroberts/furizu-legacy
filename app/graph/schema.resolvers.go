@@ -20,15 +20,21 @@ func (r *mutationResolver) StartWhoamiChallenge(ctx context.Context, email strin
 }
 
 func (r *mutationResolver) RedeemWhoamiChallenge(ctx context.Context, email string, token string) (*model.JwtResponse, error) {
-	jwt, err := whoami.Redeem(email, token)
+	tokenSet, err := whoami.Redeem(email, token)
 	return &model.JwtResponse{
-		Jwt:     jwt,
-		Success: err == nil,
+		AccessToken:  tokenSet.AccessToken,
+		RefreshToken: tokenSet.RefreshToken,
+		Success:      err == nil,
 	}, err
 }
 
-func (r *mutationResolver) RefreshJwt(ctx context.Context) (*model.JwtResponse, error) {
-	panic(fmt.Errorf("not implemented"))
+func (r *mutationResolver) RefreshToken(ctx context.Context, prevRefreshToken string) (*model.JwtResponse, error) {
+	tokenSet, err := whoami.Refresh(prevRefreshToken)
+	return &model.JwtResponse{
+		AccessToken:  tokenSet.AccessToken,
+		RefreshToken: tokenSet.RefreshToken,
+		Success:      err == nil,
+	}, err
 }
 
 func (r *mutationResolver) RevokeToken(ctx context.Context) (*model.EmptyResponse, error) {

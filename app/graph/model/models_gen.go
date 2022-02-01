@@ -7,8 +7,9 @@ type EmptyResponse struct {
 }
 
 type JwtResponse struct {
-	Success bool   `json:"success"`
-	Jwt     string `json:"jwt"`
+	Success      bool   `json:"success"`
+	AccessToken  string `json:"accessToken"`
+	RefreshToken string `json:"refreshToken"`
 }
 
 type User struct {

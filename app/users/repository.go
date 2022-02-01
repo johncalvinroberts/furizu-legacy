@@ -10,7 +10,6 @@ import (
 )
 
 const USERS_UUID_NS = "3033d171-09f3-4648-8c28-843e73a5b7e7"
-const USERS_CTX_KEY = "USER"
 
 var table dynamo.Table
 var userUuidNamespace uuid.UUID

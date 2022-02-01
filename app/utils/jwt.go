@@ -5,55 +5,46 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	jwtpkg "github.com/robbert229/jwt"
 )
 
 const EXPIRE_CLAIM = "expire"
+const USERS_CTX_KEY = "USER"
 
 type jwtEncDec struct {
 	alg jwtpkg.Algorithm
 }
 
+type UserPartial struct {
+	Email string
+	Id    string
+}
+
 var FurizuJWT *jwtEncDec
 
-var ttlMs int
+var jwtTtlMs int
+var refreshTokenTtlMs int
 
 func InitJWT() {
 	FurizuJWT = &jwtEncDec{
 		alg: jwtpkg.HmacSha256(os.Getenv("JWT_SECRET")),
 	}
 	var err error
-	ttlMs, err = strconv.Atoi(os.Getenv("JWT_TTL_MINS"))
-	ttlMs = ttlMs * 60000
+	jwtTtlMs, err = strconv.Atoi(os.Getenv("JWT_ACCESSTOKEN_TTL_MS"))
+	if err != nil {
+		log.Fatalf("Failed to init JWT")
+	}
+	refreshTokenTtlMs, err = strconv.Atoi(os.Getenv("JWT_REFRESHTOKEN_TTL_MS"))
 	if err != nil {
 		log.Fatalf("Failed to init JWT")
 	}
 }
 
-func (ed *jwtEncDec) FromToken(token string, kvs map[string]string) (map[string]string, error) {
-	claims, err := ed.alg.Decode(token)
-	if err != nil {
-		return nil, err
-	}
-
-	for key := range kvs {
-		iVal, err := claims.Get(key)
-		if err != nil {
-			return nil, err
-		}
-		strVal, ok := iVal.(string)
-		if !ok {
-			return nil, errors.New("incorrect JWT claim")
-		}
-
-		kvs[key] = strVal
-	}
-	return kvs, nil
-}
-
-func (ed *jwtEncDec) ToToken(kvs map[string]string) (string, error) {
+func (ed *jwtEncDec) CreateToken(kvs map[string]string, ttlMs int) (string, error) {
 	claims := jwtpkg.NewClaim()
 	claims.Set(EXPIRE_CLAIM, time.Now().Unix()+int64(ttlMs))
 	for key, val := range kvs {
@@ -65,6 +56,14 @@ func (ed *jwtEncDec) ToToken(kvs map[string]string) (string, error) {
 		return "", err
 	}
 	return token, nil
+}
+
+func (ed *jwtEncDec) GenerateAccessToken(kvs map[string]string) (string, error) {
+	return ed.CreateToken(kvs, jwtTtlMs)
+}
+
+func (ed *jwtEncDec) GenerateRefreshToken(kvs map[string]string) (string, error) {
+	return ed.CreateToken(kvs, refreshTokenTtlMs)
 }
 
 func (ed *jwtEncDec) ValidateFromToken(token string) (claims *jwtpkg.Claims, err error) {
@@ -88,4 +87,39 @@ func (ed *jwtEncDec) ValidateFromToken(token string) (claims *jwtpkg.Claims, err
 	}
 
 	return claims, nil
+}
+
+func Authenticate(c *gin.Context) (user *UserPartial, err error) {
+	if user, ok := c.Get(USERS_CTX_KEY); ok {
+		return user.(*UserPartial), nil
+	}
+	header := c.Request.Header.Get("Authorization")
+	token := strings.Split(header, "Bearer")[1]
+	token = strings.TrimSpace(token)
+
+	if token == "" {
+		return nil, errors.New("no token")
+	}
+
+	decoded, err := FurizuJWT.ValidateFromToken(token)
+	if err != nil {
+		return nil, err
+	}
+
+	email, err := decoded.Get("email")
+	if err != nil {
+		return nil, err
+	}
+	userId, err := decoded.Get("userId")
+	if err != nil {
+		return nil, err
+	}
+
+	userPartial := &UserPartial{
+		Email: email.(string),
+		Id:    userId.(string),
+	}
+
+	c.Set(USERS_CTX_KEY, userPartial)
+	return userPartial, nil
 }

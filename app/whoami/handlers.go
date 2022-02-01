@@ -15,9 +15,9 @@ import (
 	"github.com/johncalvinroberts/furizu/app/utils"
 )
 
-type RedeemWhoamiReq struct {
-	Email string `json:"email"`
-	Token string `json:"token"`
+type TokenSet struct {
+	AccessToken  string
+	RefreshToken string
 }
 
 // get current user
@@ -26,7 +26,11 @@ func Me(ctx context.Context) (user *users.User, err error) {
 	if err != nil {
 		return nil, err
 	}
-	user, err = utils.Authenticate(gc)
+	userPartial, err := utils.Authenticate(gc)
+	if err != nil {
+		return nil, err
+	}
+	user, err = users.FindUserByEmail(userPartial.Email)
 	if err != nil {
 		return nil, err
 	}
@@ -50,47 +54,93 @@ func Start(email string) error {
 }
 
 // find WhoamiChallenge based on request
-func Redeem(email string, token string) (jwt string, err error) {
+func Redeem(email string, token string) (*TokenSet, error) {
 	// lookup whoami challenge
 	result, err := findWhoamiChallenge(token)
 	if err != nil && strings.Contains(err.Error(), "no item found") {
-		return jwt, errors.New("token invalid or expired")
+		return nil, errors.New("token invalid or expired")
 	}
 
 	if err != nil {
 		log.Printf("err %s", err.Error())
-		return jwt, err
+		return nil, err
 	}
-	// return 400 if invalid
+	// check if whoamireq is expired
 	if result.Exp.Before(time.Now()) || result.Email != email {
-		return jwt, errors.New("token invalid or expired")
+		return nil, errors.New("token invalid or expired")
 	}
 	// if we get here, successfully redeemed token
 	// create/update user
 	user, err := users.UpsertUser(email)
 	if err != nil {
 		log.Printf("Failed to upsert user %v", err)
-		return jwt, err
+		return nil, err
 	}
-	// issue jwt
-	jwt, err = utils.FurizuJWT.ToToken(map[string]string{
-		"id":    fmt.Sprint(user.ID),
-		"email": fmt.Sprint(user.Email),
+	// create tokens
+	accessToken, err := utils.FurizuJWT.GenerateAccessToken(map[string]string{
+		"userId": fmt.Sprint(user.ID),
+		"email":  fmt.Sprint(user.Email),
 	})
 	if err != nil {
-		log.Printf("Failed to issue jwt %v", err)
+		log.Printf("Failed to issue accessToken %v", err)
+		return nil, err
+	}
+	// TODO: persist session in db?
+	refreshToken, err := utils.FurizuJWT.GenerateRefreshToken(map[string]string{
+		"userId": fmt.Sprint(user.ID),
+		"email":  fmt.Sprint(user.Email),
+	})
+	if err != nil {
+		log.Printf("Failed to issue refreshToken %v", err)
+		return nil, err
 	}
 	// lastly, delete token from dynamo
 	err = destroyWhoamiChallenge(token)
 	if err != nil {
 		log.Printf("Failed to destroy token %v", err)
+		return nil, err
 	}
-	return jwt, nil
+	return &TokenSet{
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
+	}, nil
 }
 
-func Refresh(c *gin.Context) {
-	// issue a new token
-	c.JSON(http.StatusOK, map[string]bool{"success": true})
+func Refresh(prevRefreshToken string) (*TokenSet, error) {
+	decoded, err := utils.FurizuJWT.ValidateFromToken(prevRefreshToken)
+	if err != nil {
+		return nil, err
+	}
+	email, err := decoded.Get("email")
+	if err != nil {
+		return nil, err
+	}
+	// TODO: check session in db
+	user, err := users.FindUserByEmail(email.(string))
+	if err != nil {
+		log.Printf("Failed to find user during refresh token %v", err)
+		return nil, err
+	}
+	// create tokens
+	accessToken, err := utils.FurizuJWT.GenerateAccessToken(map[string]string{
+		"userId": fmt.Sprint(user.ID),
+		"email":  fmt.Sprint(user.Email),
+	})
+	if err != nil {
+		log.Printf("Failed to issue accessToken %v", err)
+		return nil, err
+	}
+	refreshToken, err := utils.FurizuJWT.GenerateRefreshToken(map[string]string{
+		"userId": fmt.Sprint(user.ID),
+		"email":  fmt.Sprint(user.Email),
+	})
+	if err != nil {
+		log.Printf("Failed to issue refresh token %v", err)
+	}
+	return &TokenSet{
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
+	}, nil
 }
 
 func Revoke(c *gin.Context) {

@@ -18,7 +18,7 @@ func init() {
 
 func SetCookie(c *gin.Context, token string) {
 	// NOTE: ttlMs set in .jwt.go
-	c.SetCookie("tk", token, ttlMs, "/", "", secure, httpOnly)
+	c.SetCookie("tk", token, jwtTtlMs, "/", "", secure, httpOnly)
 }
 
 func RespondWithError(c *gin.Context, code int, message interface{}) {

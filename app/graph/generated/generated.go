@@ -48,13 +48,14 @@ type ComplexityRoot struct {
 	}
 
 	JwtResponse struct {
-		Jwt     func(childComplexity int) int
-		Success func(childComplexity int) int
+		AccessToken  func(childComplexity int) int
+		RefreshToken func(childComplexity int) int
+		Success      func(childComplexity int) int
 	}
 
 	Mutation struct {
 		RedeemWhoamiChallenge func(childComplexity int, email string, token string) int
-		RefreshJwt            func(childComplexity int) int
+		RefreshToken          func(childComplexity int, prevRefreshToken string) int
 		RevokeToken           func(childComplexity int) int
 		StartWhoamiChallenge  func(childComplexity int, email string) int
 	}
@@ -74,7 +75,7 @@ type ComplexityRoot struct {
 type MutationResolver interface {
 	StartWhoamiChallenge(ctx context.Context, email string) (*model.EmptyResponse, error)
 	RedeemWhoamiChallenge(ctx context.Context, email string, token string) (*model.JwtResponse, error)
-	RefreshJwt(ctx context.Context) (*model.JwtResponse, error)
+	RefreshToken(ctx context.Context, prevRefreshToken string) (*model.JwtResponse, error)
 	RevokeToken(ctx context.Context) (*model.EmptyResponse, error)
 }
 type QueryResolver interface {
@@ -103,12 +104,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.EmptyResponse.Success(childComplexity), true
 
-	case "JwtResponse.jwt":
-		if e.complexity.JwtResponse.Jwt == nil {
+	case "JwtResponse.accessToken":
+		if e.complexity.JwtResponse.AccessToken == nil {
 			break
 		}
 
-		return e.complexity.JwtResponse.Jwt(childComplexity), true
+		return e.complexity.JwtResponse.AccessToken(childComplexity), true
+
+	case "JwtResponse.refreshToken":
+		if e.complexity.JwtResponse.RefreshToken == nil {
+			break
+		}
+
+		return e.complexity.JwtResponse.RefreshToken(childComplexity), true
 
 	case "JwtResponse.success":
 		if e.complexity.JwtResponse.Success == nil {
@@ -129,12 +137,17 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.RedeemWhoamiChallenge(childComplexity, args["email"].(string), args["token"].(string)), true
 
-	case "Mutation.refreshJwt":
-		if e.complexity.Mutation.RefreshJwt == nil {
+	case "Mutation.refreshToken":
+		if e.complexity.Mutation.RefreshToken == nil {
 			break
 		}
 
-		return e.complexity.Mutation.RefreshJwt(childComplexity), true
+		args, err := ec.field_Mutation_refreshToken_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.RefreshToken(childComplexity, args["prevRefreshToken"].(string)), true
 
 	case "Mutation.revokeToken":
 		if e.complexity.Mutation.RevokeToken == nil {
@@ -277,13 +290,14 @@ type Query {
 
 type JwtResponse {
   success: Boolean!
-  jwt: String!
+  accessToken: String!
+  refreshToken: String!
 }
 
 type Mutation {
   startWhoamiChallenge(email: String!): EmptyResponse
   redeemWhoamiChallenge(email: String!, token: String!): JwtResponse
-  refreshJwt: JwtResponse
+  refreshToken(prevRefreshToken: String!): JwtResponse
   revokeToken: EmptyResponse
 }
 `, BuiltIn: false},
@@ -315,6 +329,21 @@ func (ec *executionContext) field_Mutation_redeemWhoamiChallenge_args(ctx contex
 		}
 	}
 	args["token"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_refreshToken_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["prevRefreshToken"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("prevRefreshToken"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["prevRefreshToken"] = arg0
 	return args, nil
 }
 
@@ -456,7 +485,7 @@ func (ec *executionContext) _JwtResponse_success(ctx context.Context, field grap
 	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _JwtResponse_jwt(ctx context.Context, field graphql.CollectedField, obj *model.JwtResponse) (ret graphql.Marshaler) {
+func (ec *executionContext) _JwtResponse_accessToken(ctx context.Context, field graphql.CollectedField, obj *model.JwtResponse) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -474,7 +503,42 @@ func (ec *executionContext) _JwtResponse_jwt(ctx context.Context, field graphql.
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Jwt, nil
+		return obj.AccessToken, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _JwtResponse_refreshToken(ctx context.Context, field graphql.CollectedField, obj *model.JwtResponse) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "JwtResponse",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.RefreshToken, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -569,7 +633,7 @@ func (ec *executionContext) _Mutation_redeemWhoamiChallenge(ctx context.Context,
 	return ec.marshalOJwtResponse2ᚖgithubᚗcomᚋjohncalvinrobertsᚋfurizuᚋappᚋgraphᚋmodelᚐJwtResponse(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Mutation_refreshJwt(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Mutation_refreshToken(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -585,9 +649,16 @@ func (ec *executionContext) _Mutation_refreshJwt(ctx context.Context, field grap
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_refreshToken_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().RefreshJwt(rctx)
+		return ec.resolvers.Mutation().RefreshToken(rctx, args["prevRefreshToken"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2060,9 +2131,19 @@ func (ec *executionContext) _JwtResponse(ctx context.Context, sel ast.SelectionS
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "jwt":
+		case "accessToken":
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._JwtResponse_jwt(ctx, field, obj)
+				return ec._JwtResponse_accessToken(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "refreshToken":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._JwtResponse_refreshToken(ctx, field, obj)
 			}
 
 			out.Values[i] = innerFunc(ctx)
@@ -2114,9 +2195,9 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, innerFunc)
 
-		case "refreshJwt":
+		case "refreshToken":
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_refreshJwt(ctx, field)
+				return ec._Mutation_refreshToken(ctx, field)
 			}
 
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, innerFunc)
