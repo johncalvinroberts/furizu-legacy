@@ -1,5 +1,12 @@
 <script>
+	import { getContext } from 'svelte';
 	import { page } from '$app/stores';
+	import WhoamiForm from '$lib/components/WhoamiForm.svelte';
+	const { open } = getContext('simple-modal');
+
+	const showPopup = () => {
+		open(WhoamiForm);
+	};
 </script>
 
 <header class={$$props.class}>
@@ -9,10 +16,10 @@
 	<nav>
 		<ul>
 			<li class:active={$page.url.pathname === '/what-is-this'}>
-				<a sveltekit:prefetch href="/what-is-this">What is this?</a>
+				<a sveltekit:prefetch class="nav-link" href="/what-is-this">What is this?</a>
 			</li>
 			<li class:active={$page.url.pathname === '/whoami'}>
-				<a sveltekit:prefetch href="/whoami">Login</a>
+				<button class="nav-link" on:click={showPopup}>Login</button>
 			</li>
 		</ul>
 	</nav>
@@ -29,13 +36,10 @@
 	.furizu-header {
 		font-size: var(--xl);
 	}
-	.furizu-header a {
-		text-decoration: none;
-		transition: color 0.2s linear;
-	}
 
 	.furizu-header a:hover {
 		color: var(--muted);
+		transition: all 0.2s linear;
 	}
 
 	ul {
@@ -54,7 +58,7 @@
 		height: 100%;
 	}
 
-	nav a {
+	.nav-link {
 		display: flex;
 		align-items: center;
 		padding: 0 1em;
@@ -66,8 +70,7 @@
 		text-decoration: none;
 		transition: color 0.2s linear;
 	}
-
-	a:hover {
+	.nav-link:hover {
 		color: var(--muted);
 	}
 </style>

@@ -12,7 +12,7 @@
 		padding: 15px;
 		min-width: 265px;
 		transition: all 150ms ease;
-		box-shadow: var(--elevation-one);
+		/* box-shadow: var(--elevation-one); */
 		color: var(--background);
 	}
 </style>

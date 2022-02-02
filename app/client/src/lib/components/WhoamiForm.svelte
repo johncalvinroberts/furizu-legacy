@@ -1,7 +1,9 @@
 <script>
 	import { createForm } from 'svelte-forms-lib';
 	import Card from './Card.svelte';
+	import Button from './Button.svelte';
 	import * as yup from 'yup';
+	import { startWhoamiChallenge } from '../whoami/whoami.gq';
 
 	const { form, errors, handleChange, handleSubmit } = createForm({
 		initialValues: {
@@ -10,8 +12,13 @@
 		validationSchema: yup.object().shape({
 			email: yup.string().email().required(),
 		}),
-		onSubmit: (values) => {
-			alert(JSON.stringify(values));
+		onSubmit: async (values) => {
+			try {
+				const res = await startWhoamiChallenge({ variables: values });
+				console.log({ res });
+			} catch (error) {
+				alert(error.message);
+			}
 		},
 	});
 </script>
@@ -31,7 +38,7 @@
 			<small>{$errors.email}</small>
 		{/if}
 
-		<button type="submit">Continue</button>
+		<Button type="submit">Continue</Button>
 	</form>
 </Card>
 

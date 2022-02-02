@@ -1,18 +1,21 @@
 <script lang="ts">
 	import '../global.css';
 	import Header from '../lib/components/Header.svelte';
+	import Modal from '../lib/components/Modal.svelte';
 
 	const year = new Date().getFullYear();
 </script>
 
-<Header class="header" />
-<main>
-	<slot />
-</main>
+<Modal>
+	<Header class="header" />
+	<main>
+		<slot />
+	</main>
 
-<footer>
-	© furizu {year}
-</footer>
+	<footer>
+		© furizu {year}
+	</footer>
+</Modal>
 
 <style>
 	:global(.header) {

@@ -47,6 +47,7 @@ func main() {
 	router := gin.Default()
 	// static server
 	router.Use(static.Serve("/", embedFolder(embeddedFiles, "client/build")))
+	router.Use(utils.CORSMiddleware())
 	router.Use(ginContextToContextMiddleware())
 	router.GET("/playground", playgroundHandler())
 	router.POST("/query", graphQlHandler())

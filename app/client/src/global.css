@@ -75,39 +75,22 @@ select {
   height: 45px;
 }
 
-button {
-  color: var(--text);
-  background-color: var(--muted);
-  border: none;
-  text-transform: uppercase;
-  outline: none;
-  display: block;
-  min-width: 120px;
-  transition: all 150ms ease;
-  cursor: pointer;
-  padding: var(--sm);
-  margin-bottom: var(--sm);
-  border-radius: var(--xxs);
-}
-
-button:disabled {
-  opacity: 0.8;
-}
-
-button:focus:not(:disabled) {
-  box-shadow: 0 0 0 4px var(--muted);
-}
-
-button:hover:not(:disabled) {
-  box-shadow: var(--elevation-one);
-}
-
 label {
   display: block;
   font-weight: bold;
   text-transform: uppercase;
   margin-bottom: var(--xs);
   font-size: var(--sm);
+}
+
+button {
+  background: none;
+  color: currentColor;
+  cursor: pointer;
+}
+
+a {
+  text-decoration: none;
 }
 
 /* used for errors */
@@ -124,6 +107,9 @@ hr {
   margin-bottom: var(--md);
 }
 
-p {
-  
+::selection {
+  background: var(--muted);
+}
+::selection {
+  background: var(--muted);
 }

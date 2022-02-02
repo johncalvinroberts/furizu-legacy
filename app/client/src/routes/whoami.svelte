@@ -3,9 +3,3 @@
 </script>
 
 <WhoamiForm />
-
-<style>
-	.whoami-form {
-		height: 100%;
-	}
-</style>
