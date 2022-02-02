@@ -32,6 +32,8 @@
 	"dependencies": {
 		"@leveluptuts/g-query": "^0.2.2",
 		"@leveluptuts/svelte-toy": "^0.0.18",
-		"graphql-tag": "^2.12.6"
+		"graphql-tag": "^2.12.6",
+		"svelte-forms-lib": "^2.0.1",
+		"yup": "^0.32.11"
 	}
 }

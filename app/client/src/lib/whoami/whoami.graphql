@@ -1,0 +1,28 @@
+mutation startWhoamiChallenge($email:String!) {
+	startWhoamiChallenge(email: $email) {
+		success
+	}
+}
+
+mutation redeemWhoamiChallenge($email:String!, $token: String!) {
+	redeemWhoamiChallenge(email: $email, token: $token) {
+		success
+		accessToken
+		refreshToken
+	}
+}
+
+mutation refreshToken($prevRefreshToken: String!) {
+refreshToken(prevRefreshToken: $prevRefreshToken) {
+		accessToken
+		refreshToken
+		success
+	}
+}
+
+query Me {
+	me {
+		id
+		email
+	}
+}

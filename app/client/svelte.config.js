@@ -18,7 +18,7 @@ const config = {
 		vite: {
 			plugins: [
 				gQueryCodegen({
-					schema: '../graph/schema.graphqls',
+					schema: '../graph/schema.graphql',
 					out: './src/lib/graphql',
 					gPath: '$lib/g',
 				}),
