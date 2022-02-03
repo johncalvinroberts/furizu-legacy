@@ -6,7 +6,7 @@
 	import { notifications } from '$lib/stores/notifications';
 	import Check from './icons/Check.svelte';
 	import BackButton from './BackButton.svelte';
-	import { whoami, setWhoamiState } from '../stores/whoami';
+	import { setWhoamiState } from '../stores/whoami';
 
 	enum steps {
 		SEND_WHOAMI_CHALLENGE,
@@ -15,9 +15,9 @@
 	}
 
 	// let step: steps = steps.SEND_WHOAMI_CHALLENGE;
-	let step: steps = steps.REDEEM_WHOAMI_CHALLENGE;
+	let step: steps = steps.AUTHENTICATED;
 	let isLoading = false;
-	let email = 'john.calvin.roberts@gmail.com';
+	let email = '';
 	let emailError = '';
 	let code = '';
 	let redeemError = '';
@@ -97,7 +97,15 @@
 		</form>
 	{/if}
 	{#if step === steps.AUTHENTICATED}
-		you're good man!
+		<div class="authenticated">
+			<span class="success-icon-authenticated">
+				<Check />
+			</span>
+			<h3>Done. You're authenticated.</h3>
+		</div>
+		<div class="authenticated-buttons">
+			<Button>Okay.</Button>
+		</div>
 	{/if}
 </Card>
 
@@ -118,5 +126,19 @@
 	.buttons {
 		display: flex;
 		justify-content: space-between;
+	}
+	.authenticated {
+		display: flex;
+		justify-content: space-between;
+	}
+	.success-icon-authenticated {
+		width: 100px;
+		margin-right: var(--md);
+		color: var(--success);
+	}
+
+	.authenticated-buttons {
+		justify-content: center;
+		display: flex;
 	}
 </style>
