@@ -1,9 +1,18 @@
 <script lang="ts">
-	export let type = 'button';
+	import LoadingFlakes from './LoadingFlakes.svelte';
+	import { createEventDispatcher } from 'svelte';
+	export let type: 'button' | 'submit' | 'reset' = 'button';
+	export let disabled = false;
+	export let isLoading = false;
+
+	const dispatch = createEventDispatcher();
 </script>
 
-<button {type}>
+<button {type} {disabled} on:click={(e) => dispatch('click', e)}>
 	<slot />
+	{#if isLoading}
+		<LoadingFlakes />
+	{/if}
 </button>
 
 <style>
@@ -27,7 +36,7 @@
 	}
 
 	button:focus:not(:disabled) {
-		box-shadow: 0 0 0 4px var(--muted);
+		box-shadow: var(--elevation-one);
 	}
 
 	button:hover:not(:disabled) {

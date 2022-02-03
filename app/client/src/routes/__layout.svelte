@@ -1,7 +1,9 @@
 <script lang="ts">
-	import '../global.css';
+	import '../styles/fonts.css';
+	import '../styles/global.css';
 	import Header from '../lib/components/Header.svelte';
 	import Modal from '../lib/components/Modal.svelte';
+	import Toast from '../lib/components/Toast.svelte';
 
 	const year = new Date().getFullYear();
 </script>
@@ -15,6 +17,7 @@
 	<footer>
 		© furizu {year}
 	</footer>
+	<Toast />
 </Modal>
 
 <style>
