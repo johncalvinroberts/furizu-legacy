@@ -1,11 +1,18 @@
-<script>
+<script lang="ts">
 	import { getContext } from 'svelte';
 	import { page } from '$app/stores';
 	import WhoamiForm from '$lib/components/WhoamiForm.svelte';
+	import AccountInfo from '$lib/components/AccountInfo.svelte';
+	import LoadingFlakes from '$lib/components/LoadingFlakes.svelte';
+	import { whoami } from '../stores/whoami';
+
 	const { open } = getContext('simple-modal');
 
 	const showPopup = () => {
 		open(WhoamiForm);
+	};
+	const showAccountInfo = () => {
+		open(AccountInfo);
 	};
 </script>
 
@@ -19,7 +26,17 @@
 				<a sveltekit:prefetch class="nav-link" href="/what-is-this">What is this?</a>
 			</li>
 			<li class:active={$page.url.pathname === '/whoami'}>
-				<button class="nav-link" on:click={showPopup}>Login</button>
+				{#if $whoami.isLoggedIn}
+					<button class="nav-link" on:click={showAccountInfo}>
+						{$whoami.email}
+					</button>
+				{:else if $whoami.isLoading}
+					<div class="loading-wrapper">
+						<LoadingFlakes />
+					</div>
+				{:else}
+					<button class="nav-link" on:click={showPopup}>Login</button>
+				{/if}
 			</li>
 		</ul>
 	</nav>
@@ -72,5 +89,9 @@
 	}
 	.nav-link:hover {
 		color: var(--muted);
+	}
+	.loading-wrapper {
+		width: 100px;
+		padding-left: 20px;
 	}
 </style>

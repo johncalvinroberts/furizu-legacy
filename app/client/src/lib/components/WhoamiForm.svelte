@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { getContext } from 'svelte';
 	import Card from './Card.svelte';
 	import Button from './Button.svelte';
 	import { EMAIL_REGEX } from '../constants';
@@ -7,6 +8,7 @@
 	import Check from './icons/Check.svelte';
 	import BackButton from './BackButton.svelte';
 	import { setWhoamiState } from '../stores/whoami';
+	const { close } = getContext('simple-modal');
 
 	enum steps {
 		SEND_WHOAMI_CHALLENGE,
@@ -14,8 +16,7 @@
 		AUTHENTICATED,
 	}
 
-	// let step: steps = steps.SEND_WHOAMI_CHALLENGE;
-	let step: steps = steps.AUTHENTICATED;
+	let step: steps = steps.SEND_WHOAMI_CHALLENGE;
 	let isLoading = false;
 	let email = '';
 	let emailError = '';
@@ -85,7 +86,7 @@
 		<form on:submit={handleRedeem}>
 			<label for="email">Email</label>
 			<input id="email" name="email" bind:value={email} disabled />
-			<label for="code">Verification Code</label>
+			<label for="code">Login Code</label>
 			<input id="code" name="code" bind:value={code} />
 			{#if redeemError}
 				<small>{redeemError}</small>
@@ -104,7 +105,7 @@
 			<h3>Done. You're authenticated.</h3>
 		</div>
 		<div class="authenticated-buttons">
-			<Button>Okay.</Button>
+			<Button on:click={() => close()}>Okay.</Button>
 		</div>
 	{/if}
 </Card>

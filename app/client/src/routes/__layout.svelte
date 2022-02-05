@@ -1,11 +1,16 @@
 <script lang="ts">
 	import '../styles/fonts.css';
 	import '../styles/global.css';
+	import { browser } from '$app/env';
 	import Header from '../lib/components/Header.svelte';
 	import Modal from '../lib/components/Modal.svelte';
 	import Toast from '../lib/components/Toast.svelte';
+	import initSnow from '../lib/snow/snow';
 
 	const year = new Date().getFullYear();
+	if (browser) {
+		initSnow();
+	}
 </script>
 
 <Modal>
@@ -25,6 +30,7 @@
 		position: sticky;
 		top: 0;
 		backdrop-filter: blur(12px);
+		z-index: 100;
 	}
 
 	main {
@@ -38,6 +44,8 @@
 		justify-content: center;
 		display: flex;
 		align-items: center;
+		z-index: 100;
+		position: relative;
 	}
 
 	footer {
