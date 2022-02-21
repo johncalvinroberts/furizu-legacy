@@ -1,9 +1,9 @@
 :root {
-  font-family: "GT Maru";
-  --background: hsla(201deg 100% 29%);
+  font-family: "News Gothic";
+  --background: #001d93;
   --success: rgb(0, 186, 121);
   --warning: #f0ad4e;
-  --muted: hsla(0,1%,10%,1);
+  --muted: #020030;
   --error: #ff4c4c;
   --grey: #dcdcdc;
   --text: hsl(210,50%,96%);
@@ -61,13 +61,13 @@ textarea {
   transition: all 150ms ease;
   margin-bottom: var(--sm);
   padding: var(--xs);
-  border-radius: var(--xxs);
+  border-radius: 1px;
 }
 
 input:focus,
 select:focus,
 textarea:focus {
-  outline: var(--success) solid 3px;
+  outline: var(--background) solid 3px;
 }
 
 input:disabled,
